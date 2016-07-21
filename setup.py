@@ -29,7 +29,10 @@ setup(name=PROJECT,
       author_email='thacker.jon@gmail.com',
       keywords=[],
       classifiers=[],
-      install_requires=[],
+      install_requires=[
+          'arrview',
+          'jtmri',
+      ],
       setup_requires=['pytest-runner'],
       tests_require=['pytest'],
       entry_points = {'console_scripts': [
