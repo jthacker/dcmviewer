@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os.path
 import sys
 import logging
@@ -25,7 +24,7 @@ from traitsui.editors.file_editor import ToolkitEditorFactory as FileEditorFacto
 from pyface.qt import QtGui
 
 
-log = logging.getLogger('dcmviewer')
+log = logging.getLogger(__name__)
 
 
 class CustomDirectoryEditor(SimpleFileEditor):
@@ -279,25 +278,3 @@ class DicomViewerHandler(Controller):
         echo_times = series.all_unique.EchoTime / 1000.
         r2star, _ = fit_r2star_with_threshold(echo_times, data)
         view(r2star, roi_filename=roi_filename)
-
-
-def main(path=None):
-    if path is None:
-        path = os.path.abspath('.')
-    viewer = DicomSeriesViewer(path=path)
-    viewer.configure_traits()
-    return viewer
-
-
-if __name__=='__main__':
-    from terseparse import Parser, Arg, KW
-    import os
-
-    logging.getLogger().setLevel(logging.DEBUG)
-    logging.basicConfig()
-
-    p = Parser('dicom-viewer', 'Display dicom series for viewing and editing ROIs',
-            Arg('directory', 'Working directory to start the viewer in',
-                default=os.path.abspath('.'), nargs='?'))
-    _, args = p.parse_args()
-    main(args.ns.directory)
