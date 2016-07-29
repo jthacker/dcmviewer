@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jthacker/dcmviewer.svg?branch=master)](https://travis-ci.org/jthacker/dcmviewer)
+
 # DCMViewer
 
 # ![screenshot](doc/images/screenshot.png)
