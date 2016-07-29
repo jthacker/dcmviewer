@@ -5,7 +5,6 @@ from threading import Thread
 
 ## arrview must be imported before traits so that the qt backend will be used
 from arrview import view
-from arrview.reports import SummaryReportDialog, CombineForm722ReportDialog
 
 import jtmri.dcm
 import jtmri.roi
@@ -23,6 +22,8 @@ from traitsui.qt4.file_editor import SimpleEditor as SimpleFileEditor
 from traitsui.editors.file_editor import ToolkitEditorFactory as FileEditorFactory
 from pyface.qt import QtGui
 
+from dcmviewer.reports import SummaryReportDialog, CombineForm722ReportDialog
+
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +33,6 @@ class CustomDirectoryEditor(SimpleFileEditor):
     def _create_file_dialog(self):
         """ Creates the correct type of file dialog.
         """
-        print('custom directory editor created')
         dlg = QtGui.QFileDialog(self.control)
         dlg.selectFile(self._file_name.text())
         dlg.setFileMode(QtGui.QFileDialog.Directory)
@@ -57,7 +57,7 @@ class DicomSeries(HasStrictTraits):
     def __init__(self, series):
         self.series = series
         self.update()
-        
+
     def update(self):
         series = self.series
         s = series.first
@@ -104,10 +104,10 @@ class DicomReaderThread(Thread):
 
     def run(self):
         self.dcms = jtmri.dcm.read(self.path, progress=self.progress, disp=False)
-        self.finished(self.dcms) 
+        self.finished(self.dcms)
 
 
-class DicomSeriesViewer(HasStrictTraits): 
+class DicomSeriesViewer(HasStrictTraits):
     viewseries = Button
     path = Directory
     load = Button
@@ -139,7 +139,8 @@ class DicomSeriesViewer(HasStrictTraits):
 
     def _viewseries_fired(self):
         assert len(self.selection) == 1
-        series = self.selection[0].series
+        selected = self.selection[0]
+        series = selected.series
         roi_filename = self._get_roi_filename(series)
         if roi_filename is None:
             file_dir = os.path.dirname(series.first.filename)
@@ -153,10 +154,9 @@ class DicomSeriesViewer(HasStrictTraits):
             log.info('rois_dir: {} series: {}'.format(rois_dir, series_name))
             roi_filename = os.path.join(rois_dir, series_name)
 
-        def rois_updated(filename, self=self, series=series):
-            assert len(self.selection) == 1
-            jtmri.dcm.dcminfo.update_metadata_rois(series)
-            self.selection[0].update()
+        def rois_updated(filename, selected=selected):
+            jtmri.dcm.dcminfo.update_metadata_rois(selected.series)
+            selected.update()
 
         grouper = ['SliceLocation'] if self.selection[0].slices > 0 else []
         view(series.data(grouper),
@@ -168,10 +168,10 @@ class DicomSeriesViewer(HasStrictTraits):
 
     def _load_fired(self):
         self._read_directory()
-        
+
     def _path_default(self):
         return os.path.abspath('.')
-   
+
     def _path_changed(self):
         self._read_directory()
 
@@ -187,6 +187,7 @@ class DicomSeriesViewer(HasStrictTraits):
         self.message = 'Read %d dicoms from %s' % (count, self.path)
 
     def _directory_finished_loading(self, dcms):
+        log.debug('finished loading %d dicoms', len(dcms))
         self.selection = []
         self.series = map(DicomSeries, dcms.series())
         self.dicomReaderThread = None
@@ -261,7 +262,7 @@ class DicomViewerHandler(Controller):
     def _create_summary_report(self, info):
         selected_series = info.object.selection
         SummaryReportDialog(series=selected_series).configure_traits()
-    
+
     def _create_combine_722_report(self, info):
         selected_series = info.object.selection
         CombineForm722ReportDialog(series=selected_series).configure_traits()

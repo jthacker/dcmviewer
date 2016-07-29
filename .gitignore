@@ -3,6 +3,7 @@ dist
 *.swp
 *.pyc
 *.egg-info
+*.egg
 .eggs
 .cache
 .tox

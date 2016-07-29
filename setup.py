@@ -1,12 +1,10 @@
-import os
-import re
-from setuptools import setup
+from setuptools import setup, find_packages
 
 exec(open('dcmviewer/_version.py').read())
 
 setup(name='dcmviewer',
       description='Project Description',
-      packages=['dcmviewer'],
+      packages=find_packages(),
       version=__version__,
       url='https://github.com/jthacker/dcmviewer/',
       download_url='https://github.com/jthacker/dcmviewer/archive/v{}.tar.gz'.format(__version__),
@@ -15,9 +13,11 @@ setup(name='dcmviewer',
       keywords=[],
       classifiers=[],
       install_requires=[
-          'arrview',
-          'jtmri',
-          'terseparse'
+          'arrview>=1.1',
+          'jtmri>=0.3',
+          'terseparse',
+          'traits',
+          'traitsui'
       ],
       setup_requires=['pytest-runner'],
       tests_require=['pytest'],
